@@ -1,0 +1,78 @@
+===============================================================================
+  GRAND ASPECT - BUILD INSTRUCTIONS
+===============================================================================
+
+Grand Aspect is a single C++ source file that builds into d3d11.dll, a 32-bit
+(x86) Direct3D 11 proxy DLL for GRANDIA HD Remaster.
+
+
+REQUIREMENTS
+------------
+
+* Windows 10 or 11.
+* Microsoft Visual Studio 2022 (Community is free) or the "Build Tools for
+  Visual Studio 2022", with the workload "Desktop development with C++".
+  This includes the MSVC compiler (cl.exe), the resource compiler (rc.exe)
+  and the Windows SDK (windows.h, d3d11.h, d3d11shader.h).
+
+No other libraries or dependencies are needed.
+
+
+FILES
+-----
+
+  grandia_proxy.cpp     the complete source code
+  grandia_aspect.rc     version information that is built into the DLL
+  build.bat             build script (release build)
+  build_diag.bat        build script (diagnostic build, optional)
+  grandia_mod.ini       settings file, shipped next to the DLL
+  README.txt            user documentation
+  LICENSE               GNU General Public License v3
+
+
+BUILDING
+--------
+
+1. Open the Start menu and start the "x86 Native Tools Command Prompt for
+   VS 2022" (it is in the Visual Studio 2022 folder).
+
+   It must be the x86 prompt: grandia.exe is a 32-bit program, so the DLL
+   must be 32-bit too. build.bat checks this and stops with a message if
+   another prompt is used.
+
+2. Go to the folder that contains the source files, for example:
+
+     cd /d C:\src\grand-aspect
+
+3. Run:
+
+     build.bat
+
+4. The result is d3d11.dll in the same folder. The script runs:
+
+     rc /nologo /fo grandia_aspect.res grandia_aspect.rc
+     cl /nologo /utf-8 /LD /O2 /MT /W4 /EHsc /DUNICODE /D_UNICODE
+        grandia_proxy.cpp grandia_aspect.res /Fe:d3d11.dll
+
+   /MT links the C runtime statically, so the DLL needs no Visual C++
+   redistributable.
+
+build_diag.bat does the same with /DGA_DIAG. That build contains extra
+measuring and tracing code for development and writes a much longer log.
+It is not used for releases.
+
+
+INSTALLING THE BUILD
+--------------------
+
+Copy d3d11.dll and grandia_mod.ini to the game folder (the folder that
+contains grandia.exe) and start the game. grandia_mod.log in the same folder
+shows which version was loaded and what was installed.
+
+
+NOTE ON REPRODUCIBILITY
+-----------------------
+
+A DLL built from the same source is functionally identical to the released
+d3d11.dll, but not byte-for-byte identical: the compiler writes a timestamp
+and other build details into the file, so the SHA-256 hash will differ.
